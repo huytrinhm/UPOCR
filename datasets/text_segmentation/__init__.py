@@ -13,18 +13,11 @@ def build(cfg, args):
 
     datasets = []
     for dataset_name in dataset_names:
-        if dataset_name == 'textseg_train':
-            data_root = root / 'TextSeg'
-        elif dataset_name == 'textseg_val':
-            data_root = root / 'TextSeg'
-        elif dataset_name == 'textseg_test':
-            data_root = root / 'TextSeg'
-        else:
-            raise ValueError
+        data_root = root / 'Tampered-IC13'
         
         dataset = TextSegDataset(
             data_root=data_root,
-            phase=dataset_name.split('_')[-1],
+            phase=dataset_name,
             transform=transforms
         )
         datasets.append(dataset)

@@ -10,47 +10,67 @@ class TextSegDataset(Dataset):
         self.transform = transform 
         self.task = 'text segmentation'
 
-        self._read_sample_names()
+        self._get_paths(data_root)
+        self._read_annos()
 
 
     def __getitem__(self, index):
-        sample_name = self.sample_names[index]
-
-        image_path = os.path.join(self.data_root, 'image', sample_name + '.jpg')
+        image_path = self.image_paths[index]
         image = Image.open(image_path).convert('RGB')
 
-        label_path = os.path.join(self.data_root, 'semantic_label', sample_name + '_maskfg.png')
-        label = Image.open(label_path).convert('RGB')
+        rects, labels = self.annos[index]
+        segmap = self.draw_segmap(image, rects, labels)
 
         data = {
             'image': image,
-            'label': label,
+            'label': segmap,
             'filepath': image_path,
-            'task': self.task
+            'task': self.task,
+            'ignore_value': 128
         }
 
-        if not self.transform is None:
+        if self.transform:
             data = self.transform(data)
 
         return data
 
 
     def __len__(self):
-        return len(self.sample_names)
+        return len(self.image_paths)
 
 
-    def _read_sample_names(self):
-        split_json_path = os.path.join(self.data_root, 'split.json')
-        split = json.load(open(split_json_path, 'r'))
+    def draw_segmap(self, image, rects, labels):
+        width, height = image.size 
+        segmap = np.zeros((height, width, 3), dtype=np.uint8)
 
-        sample_names = []
-        if 'train' in self.phase:
-            sample_names.extend(split['train'])
-        elif 'val' in self.phase:
-            sample_names.extend(split['val'])
-        elif 'test' in self.phase:
-            sample_names.extend(split['test'])
-        
-        assert len(sample_names) > 0, 'Wrong Phase String'
+        for rect, label in zip(rects, labels):
+            if label == 2:
+                cv2.rectangle(segmap, 
+                    (rect[0], rect[1]), (rect[2], rect[3]), 
+                    (255, 255, 255), thickness=-1)
+            elif label == 1:
+                pass
+            else:
+                raise ValueError
 
-        self.sample_names = sample_names
+        segmap = Image.fromarray(segmap).convert('RGB')
+        return segmap
+
+    def _read_annos(self):
+        self.annos = []
+        for gt_path in self.gt_paths:
+            lines = open(gt_path, 'r').read().splitlines()
+            lines = [list(map(int, line.split(','))) for line in lines]
+            lines = np.array(lines)
+            rects = lines[:, :4]
+            labels = lines[:, 4]
+            self.annos.append([rects, labels])
+
+    def _get_paths(self, data_root):
+        image_folder = os.path.join(data_root, f'{self.phase}_img')
+        gt_folder = os.path.join(data_root, f'{self.phase}_gt')
+
+        image_names = os.listdir(image_folder)
+        image_names.sort()
+        self.image_paths = [os.path.join(image_folder, name) for name in image_names]
+        self.gt_paths = [os.path.join(gt_folder, os.path.splitext(name)[0] + '.txt') for name in image_names]

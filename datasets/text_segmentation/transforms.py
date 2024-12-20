@@ -5,18 +5,14 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 class ConvertLabel(object):
-    def __init__(self, word_effect_value, ignore_value):
-        self.word_effect_value = word_effect_value
-        self.ignore_value = ignore_value
-
     def __call__(self, data):
         label = np.asarray(data['label']).copy()
-        label[label == 255] = self.ignore_value
-        label[label == 200] = self.word_effect_value
+        label[label == 255] = 128
+        label[label == 200] = 0
         label[label == 100] = 255 
         label = Image.fromarray(label).convert('RGB')
         data['label'] = label 
-        data['ignore_value'] = self.ignore_value
+        data['ignore_value'] = 128
         return data 
     
 
