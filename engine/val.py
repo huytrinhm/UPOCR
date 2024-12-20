@@ -84,7 +84,7 @@ def evaluate_ttd(model, data_loader, args):
         filepaths = data['filepath']
         for output, label, filepath in zip(outputs, labels, filepaths):
             h, w = label.shape[:2]
-            output = F.interpolate(output.unsqueeze(0), (h, w), mode='nearest', align_corners=False)[0]
+            output = F.interpolate(output.unsqueeze(0), (h, w), mode='nearest')[0]
 
             output = output.cpu()
             if args.visualize:
