@@ -84,12 +84,13 @@ def evaluate_ttd(model, data_loader, args):
         filepaths = data['filepath']
         for output, label, filepath in zip(outputs, labels, filepaths):
             h, w = label.shape[:2]
-            output = F.interpolate(output.unsqueeze(0), (h, w), mode='nearest')[0]
+            output = F.interpolate(output.unsqueeze(0), (h, w), mode='bilinear', align_corners=False)[0]
 
             output = output.cpu()
             if args.visualize:
                 seg_map = tensor_to_cv2image(output, False)
                 seg_map = seg_map[:, :, ::-1] # keep colors for three categories consistent with visualizations in the paper
+                seg_map = (seg_map[:, :, 2] > 128).astype(np.uint8) * 255
                 save_folder = os.path.join(args.output_dir, 'TTD')
                 os.makedirs(save_folder, exist_ok=True)
                 save_path = os.path.join(save_folder, os.path.splitext(os.path.basename(filepath))[0] + '.png')
