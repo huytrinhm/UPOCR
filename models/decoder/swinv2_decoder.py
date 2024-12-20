@@ -3,7 +3,7 @@ import numpy as np
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 
-from collections import Iterable
+from collections.abc import Iterable
 from timm.models.layers import trunc_normal_
 
 from models.block import build_lateral_connection, ConvWithActivation
