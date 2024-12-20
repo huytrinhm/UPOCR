@@ -3,6 +3,7 @@ import json
 from PIL import Image
 from torch.utils.data import Dataset 
 import numpy as np
+import cv2
 
 class TextSegDataset(Dataset):
     def __init__(self, data_root, phase, transform):
