@@ -43,18 +43,18 @@ def main(args):
 
     model = build_model(args)
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(model)
+    # print(model)
     print('number of params:', n_parameters)
 
     checkpointer = Checkpointer(args.distributed)
     
-    # if args.eval:
-    # val_dataset = build_dataset('val', args)
-    # val_dataloader, _ = build_dataloader(val_dataset, 'val', args)
-    assert(args.resume != '')
-    checkpointer.load(args.resume, model)
-    # evaluate(model, val_dataloader, args)
-    return
+    if args.eval:
+        val_dataset = build_dataset('val', args)
+        val_dataloader, _ = build_dataloader(val_dataset, 'val', args)
+        assert(args.resume != '')
+        checkpointer.load(args.resume, model)
+        evaluate(model, val_dataloader, args)
+        return
 
     criterion = build_criterion(args)
     optimizer = build_optimizer(model, args)

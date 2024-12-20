@@ -80,7 +80,7 @@ def load_pretrained_model(model, weight_path):
 def build(args):
     encoder = build_encoder(args)
     decoder = build_decoder(args)
-    vgg16 = build_vgg16(args) if not args.eval else None
+    vgg16 = build_vgg16(args) # if not args.eval else None
     proj = nn.Linear(encoder.num_channels, decoder.embed_dim)
     task_prompt = build_task_prompt(args)
 
