@@ -1,6 +1,6 @@
 TYPE: text segmentation
 DATA_ROOT: data/TamperedTextDetection/
-DATASET_NAMES: ['val']
+DATASET_NAMES: ['test']
 TRANSFORM:
   RESIZE:
     SIZE: [512, 512]
